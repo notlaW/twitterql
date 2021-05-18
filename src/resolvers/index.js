@@ -7,14 +7,12 @@ module.exports = {
       var params = {
         TableName: 'users',
       }
-
       try {
-        const users = await context.dynamodb.scan(params).promise
-        console.log(users)
-        return users
+        const response = await context.dynamodb.scan(params)
+        console.log(`users: ${JSON.stringify(response.Items)}`)
+        return response.Items
       } catch (error) {
         console.error(error)
-        throw new Error('Error scanning users!')
       }
     },
   },

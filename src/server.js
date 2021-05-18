@@ -7,19 +7,20 @@ module.exports = async function () {
 
   const mercurius = require('mercurius')
 
-  const dynamodb = new Dynamo()
-  console.log('Connecting to Dynamo')
-  await dynamodb.connect()
-
   const schema = require('./schemas')
   const resolvers = require('./resolvers')
+
+  const dynamodb = new Dynamo()
+  await dynamodb.connect()
+  console.log('Connected to Dynamo')
 
   fastify.register(mercurius, {
     schema,
     graphiql: true,
     resolvers,
-    context: (_, __) => {
+    context: async (_, __) => {
       // Return an object that will be available in your GraphQL resolvers
+
       return { dynamodb }
     },
   })
