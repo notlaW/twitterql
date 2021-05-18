@@ -1,7 +1,4 @@
-'use strict'
-require('dotenv').config()
-
-const port = process.env.PORT || 80
+const port = process.env.APP_PORT || 8080
 
 const start = async () => {
   try {

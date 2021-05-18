@@ -8,7 +8,7 @@ describe('healthcheck', function () {
     fastify.register(require('../../src/routes/healthcheck'))
   })
 
-  it('should respond with a healthy response', function () {
+  it('should respond with a 200', function () {
     fastify.inject(
       {
         method: 'GET',
