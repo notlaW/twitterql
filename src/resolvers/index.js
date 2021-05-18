@@ -3,6 +3,20 @@ const { v4: uuidv4 } = require('uuid')
 module.exports = {
   Query: {
     userPosts: () => [],
+    users: async (_, __, context) => {
+      var params = {
+        TableName: 'users',
+      }
+
+      try {
+        const users = await context.dynamodb.scan(params).promise
+        console.log(users)
+        return users
+      } catch (error) {
+        console.error(error)
+        throw new Error('Error scanning users!')
+      }
+    },
   },
   Mutation: {
     addPost: () => true,

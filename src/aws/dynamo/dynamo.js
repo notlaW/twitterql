@@ -8,10 +8,10 @@ class Dynamo {
       let params = {}
       if (isLocal) {
         params = {
-          endpoint: 'http://localhost:8000',
-          region: 'local',
           accessKeyId: 'local',
           secretAccessKey: 'local',
+          region: 'localhost',
+          endpoint: 'http://dynamodb-local:8000',
         }
       } else {
         params = {
@@ -46,6 +46,9 @@ class Dynamo {
   }
   async update(params) {
     return this._docclient.update(params).promise()
+  }
+  async scan(params = {}) {
+    return this._docclient.scan(params).promise()
   }
   async query(params = {}) {
     return this._docclient.query(params).promise()

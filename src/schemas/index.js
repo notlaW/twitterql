@@ -1,6 +1,7 @@
 module.exports = `
   type Query {
     userPosts: [Post]
+    users: [User]
   }
   type Mutation {
     addPost(authorId: String!, postText: String!): Boolean!
@@ -10,7 +11,7 @@ module.exports = `
     id: ID!
     postText: String!
   }
-  type user {
+  type User {
     id: ID!
     username: String!
     posts: [Post]

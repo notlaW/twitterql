@@ -6,25 +6,28 @@ services:
       context: .
       dockerfile: Dockerfile
     depends_on:
-      - dynamodb
+      - dynamodb-local
     links:
-      - dynamodb
+      - dynamodb-local
     image: nodejs
     container_name: nodejs
     restart: unless-stopped
     ports:
       - '8080:8080'
     networks:
-      - app-network
+      - dynamodb-network
     command: node ./src/index.js
-  dynamodb:
+
+  dynamodb-local:
     image: amazon/dynamodb-local
     restart: always
     ports:
       - '8000:8000'
     expose:
       - '8000'
+    networks:
+      - dynamodb-network
 
 networks:
-  app-network:
+  dynamodb-network:
     driver: bridge
