@@ -19,7 +19,7 @@ class Dynamo {
           region: 'us-east-1',
         }
       }
-      this._connection = new AWS.DynamoDB(params) // to use both? Docclient gives me better puts and gets, but cant make tables with it... hmm
+      this._connection = new AWS.DynamoDB(params) // use both? Docclient gives better puts and gets, but cant make tables with it... hmm..
       this._docclient = new AWS.DynamoDB.DocumentClient(params)
       if (isLocal) {
         try {

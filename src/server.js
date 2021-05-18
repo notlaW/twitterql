@@ -1,3 +1,5 @@
+const { JwksRateLimitError } = require('jwks-rsa')
+const { isTokenValid } = require('./auth/validate')
 const Dynamo = require('./aws/dynamo/dynamo')
 
 module.exports = async function () {
@@ -22,7 +24,24 @@ module.exports = async function () {
       // Return an object that will be available in your GraphQL resolvers
 
       const { authorization: token } = request.headers
-      return { dynamodb, token }
+      let context = { dynamodb }
+
+      // if an incoming request has an auth header, try to decode it, and place the user email on the context
+      if (token) {
+        try {
+          let email = await isTokenValid(token)
+          console.log(`Login succussful current logged in user: ${email}`)
+          context.token = token
+          context.email = email
+          return context
+        } catch (error) {
+          //if jwt validation fails, log error, return only dynamodb on the context
+          console.error(error)
+          return context
+        }
+      } else {
+        return context
+      }
     },
   })
 
