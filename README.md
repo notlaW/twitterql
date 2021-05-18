@@ -34,5 +34,26 @@ nodejs    | {"level":30,"time":1621293032555,"pid":1,"hostname":"689ae5edeeeb","
 nodejs    | {"level":30,"time":1621293032567,"pid":1,"hostname":"689ae5edeeeb","msg":"Server listening at http://0.0.0.0:8080"}
 ```
 
-## DynamoDB Local Access
 Docker compose will stand up a local docker container with dynamodb access
+
+## GraphQL
+
+Some sample mutations and queries
+
+Create User:
+
+```
+mutation {
+  addUser(email: "fakeusername@email.com", password: "fakepassword")
+}
+```
+
+Login A User:
+
+```
+{
+  login(email: "fakeusername@email.com", password:"fakepassword" ) {
+    id email token
+  }
+}
+```

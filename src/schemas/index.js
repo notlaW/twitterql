@@ -1,11 +1,11 @@
 module.exports = `
   type Query {
     userPosts: [Post]
-    users: [User]
+    login(email: String!, password: String!): User
   }
   type Mutation {
     addPost(authorId: String!, postText: String!): Boolean!
-    addUser(username: String!): Boolean!
+    addUser(email: String!, password: String!): Boolean!
   }
   type Post {
     id: ID!
@@ -13,7 +13,9 @@ module.exports = `
   }
   type User {
     id: ID!
-    username: String!
+    email: String!
+    password: String!
     posts: [Post]
+    token: String
   }
 `

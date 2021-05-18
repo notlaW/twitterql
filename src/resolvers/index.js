@@ -1,16 +1,26 @@
 const { v4: uuidv4 } = require('uuid')
+const { isTokenValid, getJwt } = require('../validate')
 
 module.exports = {
   Query: {
     userPosts: () => [],
-    users: async (_, __, context) => {
+    login: async (_, loginUser, context) => {
+      const { db, token } = context
+
       var params = {
         TableName: 'users',
       }
       try {
         const response = await context.dynamodb.scan(params)
-        console.log(`users: ${JSON.stringify(response.Items)}`)
-        return response.Items
+        const loggedInUser = response.Items.filter(
+          (currUser) => currUser.password == loginUser.password
+        )[0]
+
+        if (loggedInUser) {
+          loggedInUser.token = getJwt()
+        }
+
+        return loggedInUser
       } catch (error) {
         console.error(error)
       }
@@ -20,11 +30,13 @@ module.exports = {
     addPost: () => true,
     addUser: async (_, user, context) => {
       try {
+        console.log('writing user')
         await context.dynamodb.put({
           TableName: 'users',
           Item: {
             id: uuidv4(),
-            username: user.username,
+            email: user.email,
+            password: user.password,
           },
         })
         return true

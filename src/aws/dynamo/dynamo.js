@@ -4,6 +4,7 @@ const table = require('./table')
 class Dynamo {
   async connect() {
     const isLocal = process.env.NODE_ENV !== 'production'
+
     if (!this._connection) {
       let params = {}
       if (isLocal) {
@@ -36,6 +37,7 @@ class Dynamo {
         }
       }
     }
+    console.log('Connected to dynamo')
     return this._connection
   }
   async put(params) {

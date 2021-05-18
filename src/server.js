@@ -18,10 +18,11 @@ module.exports = async function () {
     schema,
     graphiql: true,
     resolvers,
-    context: async (_, __) => {
+    context: async (request, _) => {
       // Return an object that will be available in your GraphQL resolvers
 
-      return { dynamodb }
+      const { authorization: token } = request.headers
+      return { dynamodb, token }
     },
   })
 
