@@ -1,3 +1,5 @@
+const Dynamo = require('./aws/dynamo/dynamo')
+
 module.exports = async function () {
   const fastify = require('fastify')({
     logger: true,
@@ -5,25 +7,24 @@ module.exports = async function () {
 
   const mercurius = require('mercurius')
 
-  const schema = `
-    type Query {
-      add(x: Int, y: Int): Int
-    }
-  `
+  const dynamodb = new Dynamo()
+  console.log('Connecting to Dynamo')
+  await dynamodb.connect()
 
-  const resolvers = {
-    Query: {
-      add: async (_, { x, y }) => x + y,
-    },
-  }
+  const schema = require('./schemas')
+  const resolvers = require('./resolvers')
 
   fastify.register(mercurius, {
     schema,
+    graphiql: true,
     resolvers,
+    context: (_, __) => {
+      // Return an object that will be available in your GraphQL resolvers
+      return { dynamodb }
+    },
   })
 
   fastify.register(require('./routes/healthcheck'))
-  // fastify.register(require('./routes/graphql'))
   fastify.log.info('Plugin Registration Complete')
 
   return fastify

@@ -5,6 +5,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    depends_on:
+      - dynamodb
+    links:
+      - dynamodb
     image: nodejs
     container_name: nodejs
     restart: unless-stopped
@@ -13,6 +17,13 @@ services:
     networks:
       - app-network
     command: node ./src/index.js
+  dynamodb:
+    image: amazon/dynamodb-local
+    restart: always
+    ports:
+      - '8000:8000'
+    expose:
+      - '8000'
 
 networks:
   app-network:
