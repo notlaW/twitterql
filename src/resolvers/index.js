@@ -6,41 +6,27 @@ const USER_TABLE = 'users'
 module.exports = {
   Query: {
     userPosts: async (_, payload, context) => {
-      console.log('USER POSTS RESOLVER')
-      const userLookup = await context.dynamodb.getUserByEmail(payload.email)
-      console.log(`userLookup: ${userLookup}`)
-      return userLookup.Item.posts
+      const user = await context.dynamodb.getUserByEmail(payload.email)
+      return user.posts
     },
     login: async (_, payload, context) => {
-      console.log('LOGIN RESOLVER')
       try {
-        // TODO: this just returns the whole list for now,
-        // do a more targeted cheaper lookup using email as a Global Secondary index
-        const response = await context.dynamodb.scan({
-          TableName: USER_TABLE,
-        })
-        const loggedInUser = response.Items.filter(
-          (currUser) => currUser.password == payload.password
-        )[0]
+        const user = await context.dynamodb.getUserByEmail(payload.email)
 
-        if (loggedInUser) {
-          loggedInUser.token = getJwt(loggedInUser.email)
-          console.log(
-            `Login succussful current logged in user: ${loggedInUser.email}`
-          )
+        if (user && user.email === payload.email) {
+          user.token = getJwt(user.email)
+          console.log(`Login succussful current logged in user: ${user.email}`)
         }
-
-        return loggedInUser
+        return user
       } catch (error) {
         console.error(error)
+        return null
       }
     },
   },
   Mutation: {
     addPost: async (_, payload, context) => {
-      console.log('ADD POST RESOLVER')
-      const userLookup = await context.dynamodb.getUserByEmail(payload.email)
-      let user = userLookup.Item
+      const user = await context.dynamodb.getUserByEmail(payload.email)
 
       const postObject = { id: uuidv4(), postText: payload.postText }
 
@@ -56,14 +42,16 @@ module.exports = {
         Item: user,
       }
 
-      await context.dynamodb.put(putParams)
-
-      return true
+      try {
+        await context.dynamodb.put(putParams)
+        return true
+      } catch (error) {
+        console.error(error)
+        return false
+      }
     },
     addUser: async (_, payload, context) => {
-      console.log('ADD USER RESOLVER')
       try {
-        console.log('writing user')
         await context.dynamodb.put({
           TableName: USER_TABLE,
           Item: {

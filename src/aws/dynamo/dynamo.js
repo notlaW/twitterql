@@ -3,7 +3,7 @@ const table = require('./table')
 
 const USER_TABLE = 'users' //TODO: app constants
 
-class Dynamo {
+module.exports = class Dynamo {
   async connect() {
     const isLocal = process.env.NODE_ENV !== 'production'
     if (!this._connection) {
@@ -69,13 +69,6 @@ class Dynamo {
     }
 
     const user = await this.get(params)
-
-    console.log(user.Item)
-
-    console.log(`Returning user: ${user.Item.posts}`)
-
-    return user
+    return user.Item
   }
 }
-
-module.exports = Dynamo

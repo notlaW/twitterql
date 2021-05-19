@@ -41,6 +41,8 @@ module.exports = async function () {
   // Runs before request is processed, passes down context to resolvers
   async function context(request) {
     const { authorization: token } = request.headers
+
+    //Make sure our dynamodb adapter is available on all resolvers
     let context = { dynamodb }
 
     // If an incoming request has an auth header, try to decode it, and place the user email on the context
@@ -52,8 +54,8 @@ module.exports = async function () {
         context.email = email
         return context
       } catch (error) {
-        // TODO: gracefully hand back a 403 in this scenario
-        console.log(error)
+        // TODO: gracefully hand back a 403 in this scenario (currently returns 500)
+        console.error(error)
         return context
       }
     } else {
@@ -64,7 +66,7 @@ module.exports = async function () {
   // Register all config with fastify+graphql plugin
   // This also generates a /graphql endpoint
   fastify.register(mercurius, {
-    schema: schema,
+    schema: schemaWithMiddleware,
     context,
   })
 
