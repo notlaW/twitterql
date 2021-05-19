@@ -57,3 +57,24 @@ Login A User:
   }
 }
 ```
+
+Add Post:
+
+Auth: will require token from the login endpoint
+(Auth token format: `Bearer: {YOUR_TOKEN})
+
+```
+mutation {
+  addPost(email: "fakeusername@email.com", postText: "super fun twitter post")
+}
+```
+
+Query User Posts
+
+```
+{
+  userPosts(email: "fakeusername@email.com" ) {
+    postText  id
+  }
+}
+```

@@ -24,15 +24,15 @@ module.exports = async function () {
   )
 
   // Permissions
-  // const permissions = shield({
-  //   Mutation: {
-  //     addPost: isPostingToSelf,
-  //   },
-  // })
+  const permissions = shield({
+    Mutation: {
+      addPost: isPostingToSelf,
+    },
+  })
 
   // JIT compilation of schema (more info here https://www.npmjs.com/package/graphql-jit)
-  // const schema = makeExecutableSchema({ typeDefs, resolvers })
-  // const schemaWithMiddleware = applyMiddleware(schema, permissions)
+  const schema = makeExecutableSchema({ typeDefs, resolvers })
+  const schemaWithMiddleware = applyMiddleware(schema, permissions)
 
   // Init data store
   const dynamodb = new Dynamo()
@@ -64,16 +64,11 @@ module.exports = async function () {
 
   // Register all config with fastify+graphql plugin
   // This also generates a /graphql endpoint
-  // fastify.register(mercurius, {
-  //   schema: schemaWithMiddleware,
-  //   context,
-  // })
-
   fastify.register(mercurius, {
-    schema: typeDefs,
-    resolvers,
+    schema: schemaWithMiddleware,
     context,
   })
+
   fastify.register(require('./routes/healthcheck'))
   fastify.log.info('Plugin Registration Complete')
 
