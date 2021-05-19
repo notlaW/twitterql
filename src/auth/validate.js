@@ -17,17 +17,13 @@ async function isTokenValid(token) {
     const bearerToken = token.split(' ')
     // Async decoding of jwt, return user email signed in jwt to validate which user is tied to jwt
     return new Promise((resolve, reject) => {
-      const decoded = jwt.verify(
-        bearerToken[1],
-        process.env.JWT_SECRET,
-        (error, decoded) => {
-          if (error) {
-            console.error(error)
-            reject(error)
-          }
-          resolve(decoded.email)
+      jwt.verify(bearerToken[1], process.env.JWT_SECRET, (error, decoded) => {
+        if (error) {
+          console.error(error)
+          reject(error)
         }
-      )
+        resolve(decoded.email)
+      })
     })
   }
 

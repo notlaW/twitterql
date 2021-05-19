@@ -13,12 +13,13 @@ module.exports = async function () {
 
   //Schema
   const typeDefs = require('./schemas')
+
   //Resolvers
   const resolvers = require('./resolvers')
 
   // Rules
   const isPostingToSelf = rule({ cache: 'contextual' })(
-    async (parent, args, ctx, info) => {
+    async (parent, args, ctx) => {
       return ctx.email === args.email
     }
   )
@@ -34,11 +35,11 @@ module.exports = async function () {
   const schema = makeExecutableSchema({ typeDefs, resolvers })
   const schemaWithMiddleware = applyMiddleware(schema, permissions)
 
-  // Init data store
+  // Init data Dynamodb store
   const dynamodb = new Dynamo()
   await dynamodb.connect()
 
-  // Runs before request is processed, passes down context to resolvers
+  // This will run before the request is processed and passes down context to resolvers
   async function context(request) {
     const { authorization: token } = request.headers
 
@@ -49,9 +50,9 @@ module.exports = async function () {
     // Email will be used to auth user against adding post
     if (token) {
       try {
-        let email = await isTokenValid(token)
+        let decodedEmail = await isTokenValid(token)
         context.token = token
-        context.email = email
+        context.email = decodedEmail
         return context
       } catch (error) {
         // TODO: gracefully hand back a 403 in this scenario (currently returns 500)

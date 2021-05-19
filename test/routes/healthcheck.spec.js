@@ -7,7 +7,6 @@ describe('healthcheck', function () {
     fastify = Fastify({ logger: { level: 'silent' } })
     fastify.register(require('../../src/routes/healthcheck'))
   })
-
   it('should respond with a 200', function () {
     fastify.inject(
       {
