@@ -1,5 +1,9 @@
-const { JwksRateLimitError } = require('jwks-rsa')
+const mercurius = require('mercurius')
+const { makeExecutableSchema } = require('@graphql-tools/schema')
+const { rule, shield } = require('graphql-shield')
+const { applyMiddleware } = require('graphql-middleware')
 const { isTokenValid } = require('./auth/validate')
+
 const Dynamo = require('./aws/dynamo/dynamo')
 
 module.exports = async function () {
@@ -7,44 +11,69 @@ module.exports = async function () {
     logger: true,
   })
 
-  const mercurius = require('mercurius')
-
-  const schema = require('./schemas')
+  //Schema
+  const typeDefs = require('./schemas')
+  //Resolvers
   const resolvers = require('./resolvers')
 
+  // Rules
+  const isPostingToSelf = rule({ cache: 'contextual' })(
+    async (parent, args, ctx, info) => {
+      return ctx.email === args.email
+    }
+  )
+
+  // Permissions
+  // const permissions = shield({
+  //   Mutation: {
+  //     addPost: isPostingToSelf,
+  //   },
+  // })
+
+  // JIT compilation of schema (more info here https://www.npmjs.com/package/graphql-jit)
+  // const schema = makeExecutableSchema({ typeDefs, resolvers })
+  // const schemaWithMiddleware = applyMiddleware(schema, permissions)
+
+  // Init data store
   const dynamodb = new Dynamo()
   await dynamodb.connect()
-  console.log('Connected to Dynamo')
 
-  fastify.register(mercurius, {
-    schema,
-    graphiql: true,
-    resolvers,
-    context: async (request, _) => {
-      // Return an object that will be available in your GraphQL resolvers
+  // Runs before request is processed, passes down context to resolvers
+  async function context(request) {
+    const { authorization: token } = request.headers
+    let context = { dynamodb }
+    console.log(token)
 
-      const { authorization: token } = request.headers
-      let context = { dynamodb }
-
-      // if an incoming request has an auth header, try to decode it, and place the user email on the context
-      if (token) {
-        try {
-          let email = await isTokenValid(token)
-          console.log(`Login succussful current logged in user: ${email}`)
-          context.token = token
-          context.email = email
-          return context
-        } catch (error) {
-          //if jwt validation fails, log error, return only dynamodb on the context
-          console.error(error)
-          return context
-        }
-      } else {
+    // If an incoming request has an auth header, try to decode it, and place the user email on the context
+    // Email will be used to auth user against adding post
+    if (token) {
+      try {
+        let email = await isTokenValid(token)
+        context.token = token
+        context.email = email
+        return context
+      } catch (error) {
+        // TODO: gracefully hand back a 403 in this scenario
+        console.log(error)
         return context
       }
-    },
-  })
+    } else {
+      return context
+    }
+  }
 
+  // Register all config with fastify+graphql plugin
+  // This also generates a /graphql endpoint
+  // fastify.register(mercurius, {
+  //   schema: schemaWithMiddleware,
+  //   context,
+  // })
+
+  fastify.register(mercurius, {
+    schema: typeDefs,
+    resolvers,
+    context,
+  })
   fastify.register(require('./routes/healthcheck'))
   fastify.log.info('Plugin Registration Complete')
 

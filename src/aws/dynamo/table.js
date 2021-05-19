@@ -2,13 +2,13 @@ module.exports = {
   TableName: 'users',
   KeySchema: [
     {
-      AttributeName: 'id',
+      AttributeName: 'email',
       KeyType: 'HASH',
     },
   ],
   AttributeDefinitions: [
     {
-      AttributeName: 'id',
+      AttributeName: 'email',
       AttributeType: 'S',
     },
   ],

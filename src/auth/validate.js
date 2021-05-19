@@ -4,6 +4,7 @@ require('dotenv').config()
 const jwt = require('jsonwebtoken')
 
 async function getJwt(email) {
+  // Quick and dirty jwt solution. Use a auth provider in a production setting
   const token = jwt.sign(
     { email, exp: Math.floor(Date.now() / 1000) + 60 * 60 },
     process.env.JWT_SECRET
@@ -14,8 +15,8 @@ async function getJwt(email) {
 async function isTokenValid(token) {
   if (token) {
     const bearerToken = token.split(' ')
-
-    // Async decoding of jwt, return user email signed in jwt to validate user tied to jwt
+    console.log(bearerToken)
+    // Async decoding of jwt, return user email signed in jwt to validate which user is tied to jwt
     return new Promise((resolve, reject) => {
       const decoded = jwt.verify(
         bearerToken[1],
