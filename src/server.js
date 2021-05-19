@@ -42,7 +42,6 @@ module.exports = async function () {
   async function context(request) {
     const { authorization: token } = request.headers
     let context = { dynamodb }
-    console.log(token)
 
     // If an incoming request has an auth header, try to decode it, and place the user email on the context
     // Email will be used to auth user against adding post
@@ -65,7 +64,7 @@ module.exports = async function () {
   // Register all config with fastify+graphql plugin
   // This also generates a /graphql endpoint
   fastify.register(mercurius, {
-    schema: schemaWithMiddleware,
+    schema: schema,
     context,
   })
 

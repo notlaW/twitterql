@@ -6,17 +6,17 @@ const USER_TABLE = 'users'
 module.exports = {
   Query: {
     userPosts: async (_, payload, context) => {
-      const userLookup = await getUserByEmail(context, payload.email)
-
+      console.log('USER POSTS RESOLVER')
+      const userLookup = await context.dynamodb.getUserByEmail(payload.email)
+      console.log(`userLookup: ${userLookup}`)
       return userLookup.Item.posts
     },
     login: async (_, payload, context) => {
-      const { dynamodb } = context
-
+      console.log('LOGIN RESOLVER')
       try {
         // TODO: this just returns the whole list for now,
         // do a more targeted cheaper lookup using email as a Global Secondary index
-        const response = await dynamodb.scan({
+        const response = await context.dynamodb.scan({
           TableName: USER_TABLE,
         })
         const loggedInUser = response.Items.filter(
@@ -38,25 +38,17 @@ module.exports = {
   },
   Mutation: {
     addPost: async (_, payload, context) => {
-      console.log(JSON.stringify(payload))
-
-      const params = {
-        TableName: USER_TABLE,
-        Key: {
-          email: payload.email,
-        },
-      }
-
-      // User lookup by email
-      // TODO: make this more reusable
-      const userLookup = await context.dynamodb.get(params)
+      console.log('ADD POST RESOLVER')
+      const userLookup = await context.dynamodb.getUserByEmail(payload.email)
       let user = userLookup.Item
+
+      const postObject = { id: uuidv4(), postText: payload.postText }
 
       // Add "post"
       if (!user.posts) {
-        user.posts = [{ id: uuidv4(), postText: payload.postText }]
+        user.posts = [postObject]
       } else {
-        user.posts.push(payload.postText)
+        user.posts.push(postObject)
       }
 
       const putParams = {
@@ -69,6 +61,7 @@ module.exports = {
       return true
     },
     addUser: async (_, payload, context) => {
+      console.log('ADD USER RESOLVER')
       try {
         console.log('writing user')
         await context.dynamodb.put({
@@ -86,15 +79,4 @@ module.exports = {
       }
     },
   },
-}
-
-async function getUserByEmail(context, email) {
-  const params = {
-    TableName: USER_TABLE,
-    Key: {
-      email,
-    },
-  }
-
-  return await context.dynamodb.get(params)
 }
