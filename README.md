@@ -106,7 +106,7 @@ This protoype utilizes DynamoDB for storage. For local development,the app will 
 
 The primary goal behind this protype was to demonstrate a graphql implentation using Fastify. Fastify is a very low overhead extension of express that comes with modern nodejs features out of the box. Mercurius, the graphql plugin for fastify, aims to do the same for graphql servers and gateways.
 
-While the performance benefits are fantastic, for a protype app that is just looking to get functionality off of the ground: I found it a bit cumbersome. One call out was the way `graphql-shield` works, if an error is thrown in your resolver you end up with a not authorized message, a 500 and a swallowed error. In order to debug I had to turn off the auth functionality in order to get correct messages. This could be solved with a debug config object but I couldn't get it to work.
+While the performance benefits are fantastic, for a protype app that is just looking to get functionality off of the ground: I found it a bit cumbersome. One call out was the way `graphql-shield` works, if an error is thrown in your resolver you end up with a not authorized message, a 500 and a swallowed error. In order to debug I had to turn off the auth functionality to get correct error messages. This could be solved with a debug config object but I couldn't get it to work.
 
 Another limitation I thought of about 9/10ths of the way through this challenge was NOT using a graph database. Dynamo was nice and provided quick local install and would have set the app up for an easy deployment to an AWS account. Something like NEO4j for example would have allowed for more flexibility in how we model, and query relationships in our data.
 
